@@ -30,9 +30,15 @@ import { PaymentRequestSender } from '../../index';
 import { createClient as createPaymentClient } from '@bigcommerce/bigpay-client';
 import { PaymentActionType } from '../../payment-actions';
 import { CreditCardInstrument } from '../../payment';
+import {getCreditCardInstrument, getPayment } from '../../payments.mock';
 import { PaymentRequestOptions} from '../../payment-request-options';
-import {CyberSourceCardinal} from './cybersource';
-import {getCyberSourceCardinal} from './cybersource.mock';
+import {
+    CyberSourceCardinal,
+    CardinalTriggerEvents,
+    CardinalBinProccessResponse,
+    CardinalConfiguration
+} from './cybersource';
+import {getCyberSourceCardinal, getCardinalValidatedData} from './cybersource.mock';
 
 describe('CyberSourceThreeDSecurePaymentProcessor', () => {
     let processor: CyberSourceThreeDSecurePaymentProcessor;
@@ -138,6 +144,16 @@ describe('CyberSourceThreeDSecurePaymentProcessor', () => {
 
             expect(cybersourceScriptLoader.load).toHaveBeenLastCalledWith(false);
         });
+
+        it('loads cybersource without test mode if disabled', () => {
+            try {
+                processor.initialize(paymentMethodMock);
+                paymentMethodMock.config.testMode = false;
+                expect(cybersourceScriptLoader.load).toHaveBeenLastCalledWith(false);
+            } catch(error) {
+                expect(error).toBeInstanceOf(MissingDataError);
+            }
+        });
     });
 
     describe('#execute', () => {
@@ -163,6 +179,54 @@ describe('CyberSourceThreeDSecurePaymentProcessor', () => {
         it('CardinalEvent CardinalValidateAction NoAction', async () => {
             try {
                 processor.initialize(paymentMethodMock);
+                JPMC.on = jest.fn((type, callback) => callback({ActionCode: 'ERROR', ErrorNumber: 666}));
+                const fn = await JPMC.trigger(CardinalTriggerEvents.BIN_PROCCESS, getCreditCardInstrument().ccNumber);
+                expect(fn).toHaveBeenCalledWith(getCardinalValidatedData());
+                expect(await processor.initialize(paymentMethodMock)).toEqual(store.getState());
+            } catch (error) {
+                expect(error).toBeInstanceOf(Error);
+            }
+        });
+
+        it('CardinalEvent CardinalValidateAction NoAction', async () => {
+            try {
+                processor.initialize(paymentMethodMock);
+                JPMC.on = jest.fn((type, callback) => callback({ActionCode: 'ERROR', ErrorNumber: 1010}));
+                const fn = await JPMC.trigger(CardinalTriggerEvents.BIN_PROCCESS, getCreditCardInstrument().ccNumber);
+                expect(fn).toHaveBeenCalledWith(getCardinalValidatedData());
+                expect(await processor.initialize(paymentMethodMock)).toEqual(store.getState());
+            } catch (error) {
+                expect(error).toBeInstanceOf(Error);
+            }
+        });
+
+        it('CardinalEvent CardinalValidateAction NoAction', async () => {
+            try {
+                processor.initialize(paymentMethodMock);
+                JPMC.on = jest.fn((type, callback) => callback({ActionCode: 'NOACTION', ErrorNumber: 666}));
+                const fn = await JPMC.trigger(CardinalTriggerEvents.BIN_PROCCESS, getCreditCardInstrument().ccNumber);
+                expect(fn).toHaveBeenCalledWith(getCardinalValidatedData());
+                expect(await processor.initialize(paymentMethodMock)).toEqual(store.getState());
+            } catch (error) {
+                expect(error).toBeInstanceOf(Error);
+            }
+        });
+
+        it('CardinalEvent CardinalValidateAction NoAction', async () => {
+            try {
+                processor.initialize(paymentMethodMock);
+                JPMC.on = jest.fn((type, callback) => callback({ActionCode: 'NOACTION', ErrorNumber: 0}));
+                const fn = await JPMC.trigger(CardinalTriggerEvents.BIN_PROCCESS, getCreditCardInstrument().ccNumber);
+                expect(fn).toHaveBeenCalledWith(getCardinalValidatedData());
+                expect(await processor.initialize(paymentMethodMock)).toEqual(store.getState());
+            } catch (error) {
+                expect(error).toBeInstanceOf(Error);
+            }
+        });
+
+        it('CardinalEvent CardinalValidateAction NoAction ErrorNumber > 0', async () => {
+            try {
+                processor.initialize(paymentMethodMock);
                 JPMC.on = jest.fn((type, callback) => callback({ActionCode: 'ERROR', ErrorNumber: 1010}));
                 expect(await processor.execute(orderPaymentRequestBody, orderRequestBody, creditCardInstrument)).toEqual(store.getState());
             } catch (error) {
@@ -186,6 +250,28 @@ describe('CyberSourceThreeDSecurePaymentProcessor', () => {
                 expect(_paymentActionCreator.submitPayment(orderPaymentRequestBody, )).toHaveBeenCalledWith(orderRequestBody, paymentRequestOptions);
             } catch (error) {
                 expect(error).toBeInstanceOf(NotInitializedError);
+            }
+        });
+
+        it('throws error if cardinal trigger fails', async () => {
+            try {
+                jest.spyOn(processor, 'execute').mockReturnValue(store.dispatch(submitOrderAction));
+                processor.initialize(paymentMethodMock);
+                expect(await processor.execute(orderPaymentRequestBody, orderRequestBody, creditCardInstrument)).toEqual(store.getState());
+                expect(_orderActionCreator.submitOrder).toHaveBeenCalledWith(orderRequestBody, paymentRequestOptions);
+                // expect(store.dispatch).toHaveBeenCalledWith(submitOrderAction);
+            } catch (error) {
+                expect(error).toBeInstanceOf(Error);
+            }
+        });
+
+        it('trigger', async () => {
+            try {
+                processor.initialize(paymentMethodMock);
+                jest.spyOn(processor, 'execute').mockReturnValue(JPMC.trigger);
+                expect(await processor.execute(orderPaymentRequestBody, orderRequestBody, creditCardInstrument)).toEqual(store.getState());
+            } catch (error) {
+                expect(error).toBeInstanceOf(Error);
             }
         });
     });

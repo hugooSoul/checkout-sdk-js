@@ -32,23 +32,15 @@ export function getCyberSourceCardinal(): CyberSourceCardinal {
     };
 }
 
-export function getRejectAuthorizationPromise(): CardinalEventResponse {
+export function getCardinalValidatedData(): CardinalValidatedData {
     return {
-        type: {
-            step: CardinalPaymentStep.AUTHORIZATION,
-            action: CardinalEventAction.OK,
-        },
-        jwt: '',
-        data: {
-            ActionCode: CardinalValidatedAction.SUCCCESS,
-            ErrorDescription: 'error',
-            ErrorNumber: 200,
-            Validated: true,
-            Payment: {
-                ProcessorTransactionId: '',
-                Type: PaymentType.CCA,
-            },
-        },
-        status: true,
-    };
+        ActionCode: CardinalValidatedAction.NOACTION,
+        ErrorDescription: 'error',
+        ErrorNumber: 12,
+        Validated: true,
+        Payment: {
+            ProcessorTransactionId: '',
+            Type: PaymentType.CCA,
+        }
+    }
 }
