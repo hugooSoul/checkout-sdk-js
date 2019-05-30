@@ -1,11 +1,19 @@
+import { OrderPaymentRequestBody } from '../../../order';
+import { getOrderRequestBody } from '../../../order/internal-orders.mock';
+import { PaymentRequestOptions } from '../../payment-request-options';
+
 import {
+    CardinalBinProccessResponse,
     CardinalEventAction,
     CardinalEventResponse,
-    CardinalPaymentStep, CardinalValidatedAction,
+    CardinalPaymentStep,
+    CardinalValidatedAction,
     CardinalValidatedData,
     CardinalWindow,
-    CyberSourceCardinal, Payment, PaymentType
+    CyberSourceCardinal,
+    PaymentType,
 } from './cybersource';
+import {isUndefined} from "util";
 
 const CardinalWindowMock: CardinalWindow = window;
 
@@ -22,13 +30,32 @@ export function getCyberSourceScriptMock(): CardinalWindow {
     };
 }
 
-export function getCyberSourceCardinal(): CyberSourceCardinal {
+export function getCybersourceCardinal(): CyberSourceCardinal {
     return {
         configure: jest.fn(),
         on: jest.fn(),
         setup: jest.fn(),
         trigger: jest.fn(),
         continue: jest.fn(),
+    };
+}
+
+export function getCybersourcePaymentData(): OrderPaymentRequestBody {
+    return {
+        ...getOrderRequestBody().payment,
+        methodId: 'cybersource',
+    };
+}
+
+export function getCybersourcePaymentRequestOptions(): PaymentRequestOptions {
+    return {
+        methodId: 'cybersource',
+    };
+}
+
+export function getCardinalBinProccessResponse(): CardinalBinProccessResponse {
+    return {
+        Status: true,
     };
 }
 
@@ -41,6 +68,27 @@ export function getCardinalValidatedData(): CardinalValidatedData {
         Payment: {
             ProcessorTransactionId: '',
             Type: PaymentType.CCA,
-        }
-    }
+        },
+    };
+}
+
+export function getRejectAuthorizationPromise(): CardinalEventResponse {
+    return {
+        type: {
+            step: CardinalPaymentStep.AUTHORIZATION,
+            action: CardinalEventAction.OK,
+        },
+        jwt: '',
+        data: {
+            ActionCode: CardinalValidatedAction.SUCCCESS,
+            ErrorDescription: 'error',
+            ErrorNumber: 200,
+            Validated: true,
+            Payment: {
+                ProcessorTransactionId: '',
+                Type: PaymentType.CCA,
+            },
+        },
+        status: true,
+    };
 }
