@@ -146,13 +146,6 @@ export interface CardinalOrderDetails {
     TransactionId?: string;
 }
 
-export interface CardinalEventResponse {
-    step: CardinalPaymentStep;
-    jwt?: string;
-    data?: CardinalValidatedData;
-    status: boolean;
-}
-
 export enum CardinalEventType {
     SetupCompleted = 'payments.setupComplete',
     Validated = 'payments.validated',
@@ -172,11 +165,6 @@ export enum CardinalPaymentType {
     VisaCheckout = 'VisaCheckout',
     ApplePay = 'ApplePay',
     DiscoverWallet = 'DiscoverWallet',
-}
-
-export enum CardinalPaymentStep {
-    Setup = 'setup',
-    Authorization = 'authorization',
 }
 
 export enum CardinalTriggerEvents {
