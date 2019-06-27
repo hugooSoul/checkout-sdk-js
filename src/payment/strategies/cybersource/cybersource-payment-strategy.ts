@@ -35,7 +35,7 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
             .then( state => {
                 this._paymentMethod = state.paymentMethods.getPaymentMethod(methodId);
 
-                if (!this._paymentMethod || !this._paymentMethod.config || this._paymentMethod.config.testMode === undefined) {
+                if (!this._paymentMethod || !this._paymentMethod.config) {
                     throw new MissingDataError(MissingDataErrorType.MissingPaymentMethod);
                 }
 
