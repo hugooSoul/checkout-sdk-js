@@ -71,11 +71,9 @@ export default class CardinalClient {
 
     runBindProcess(ccNumber: string): Promise<void> {
         return this._getClientSDK()
-            .then(client => client.trigger(CardinalTriggerEvents.BinProcess, ccNumber).catch(() => {
-                return { Status: false };
-            }))
+            .then(client => client.trigger(CardinalTriggerEvents.BinProcess, ccNumber).catch(() => {}))
             .then(result => {
-                if (result && !result.Status) {
+                if (!result || !result.Status) {
                     throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
                 }
             });
