@@ -128,7 +128,7 @@ describe('CyberSourcePaymentStrategy', () => {
             expect(cardinalClient.initialize).toHaveBeenCalledWith(true);
         });
 
-        it('throws data missing error when initializing', async () => {
+        it('throws data missing error when payment method is not defined', async () => {
             jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod').mockReturnValue(undefined);
 
             try {
