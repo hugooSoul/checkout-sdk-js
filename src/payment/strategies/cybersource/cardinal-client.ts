@@ -32,7 +32,7 @@ export default class CardinalClient {
         private _scriptLoader: CardinalScriptLoader
     ) {}
 
-    initialize(testMode: boolean): Promise<void> {
+    initialize(testMode?: boolean): Promise<void> {
         if (!this._sdk) {
             this._sdk = this._scriptLoader.load(testMode);
         }
@@ -71,18 +71,14 @@ export default class CardinalClient {
 
     runBindProcess(ccNumber: string): Promise<void> {
         return this._getClientSDK()
-            .then(client => {
-                return new Promise<void>((resolve, reject) => {
-                    client.trigger(CardinalTriggerEvents.BinProcess, ccNumber)
-                        .then(result => {
-                            if (result && result.Status) {
-                                resolve();
-                            } else {
-                                reject(new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized));
-                            }
-                        });
-                });
-        });
+            .then(client => client.trigger(CardinalTriggerEvents.BinProcess, ccNumber).catch(() => {
+                return { Status: false };
+            }))
+            .then(result => {
+                if (result && !result.Status) {
+                    throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
+                }
+            });
     }
 
     getThreeDSecureData(threeDSecureData: ThreeDsResult, orderData: CardinalOrderData): Promise<ThreeDSecureToken> {

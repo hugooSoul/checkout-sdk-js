@@ -133,6 +133,18 @@ describe('CardinalClient', () => {
                 expect(error).toBeInstanceOf(NotInitializedError);
             }
         });
+
+        it('throws an error if cardinal throws an exception', async () => {
+            jest.spyOn(sdk, 'trigger').mockImplementation(() => {
+                return Promise.reject(new Error('Error'));
+            });
+
+            try {
+                await client.runBindProcess('');
+            } catch (error) {
+                expect(error).toBeInstanceOf(NotInitializedError);
+            }
+        });
     });
 
     describe('#getThreeDSecureData', () => {
