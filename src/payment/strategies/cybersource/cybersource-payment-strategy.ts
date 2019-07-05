@@ -10,7 +10,7 @@ import { OrderActionCreator, OrderPaymentRequestBody, OrderRequestBody } from '.
 import { OrderFinalizationNotRequiredError } from '../../../order/errors';
 import isCreditCardLike from '../../is-credit-card-like';
 import isVaultedInstrument from '../../is-vaulted-instrument';
-import Payment from '../../payment';
+import Payment, { CreditCardInstrument } from '../../payment';
 import PaymentActionCreator from '../../payment-action-creator';
 import PaymentMethod from '../../payment-method';
 import PaymentMethodActionCreator from '../../payment-method-action-creator';
@@ -38,10 +38,10 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
         const { methodId } = options;
 
         return this._store.dispatch(this._paymentMethodActionCreator.loadPaymentMethod(methodId))
-            .then( state => {
+            .then(state => {
                 this._paymentMethod = state.paymentMethods.getPaymentMethod(methodId);
 
-                if (!this._paymentMethod || !this._paymentMethod.config || this._paymentMethod.config.testMode === undefined) {
+                if (!this._paymentMethod || !this._paymentMethod.config) {
                     throw new MissingDataError(MissingDataErrorType.MissingPaymentMethod);
                 }
 
@@ -80,50 +80,43 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
         }
 
         if (!payment.paymentData) {
-            throw new MissingDataError(MissingDataErrorType.MissingPayment);
+            return Promise.reject(new MissingDataError(MissingDataErrorType.MissingPayment));
         }
 
-        const { paymentData } = payment;
+        const paymentData = payment.paymentData as CreditCardInstrument;
 
         return this._cardinalClient.configure(clientToken)
-            .then(() => {
-                return this._cardinalClient.runBindProcess(this._getBinNumber(paymentData))
-                    .then(() => {
-                        return this._placeOrder(order, payment, options).catch(error => {
-                            if (!(error instanceof RequestError) || !some(error.body.errors, { code: 'enrolled_card' })) {
-                                return Promise.reject(error);
-                            }
+        .then(() => this._cardinalClient.runBindProcess(this._getBinNumber(paymentData)))
+        .then(() => {
+            return this._placeOrder(order, payment, options)
+                .catch(error => {
+                    if (!(error instanceof RequestError) || !some(error.body.errors, { code: 'enrolled_card' })) {
+                        return Promise.reject(error);
+                    }
 
-                            return this._cardinalClient.getThreeDSecureData(error.body.three_ds_result, this._getOrderData(paymentData))
-                                .then(threeDSecure =>
-                                    this._executePayment({
-                                        ...payment,
-                                        paymentData: {
-                                            ...paymentData,
-                                            threeDSecure,
-                                        },
-                                    })
-                            );
-                        });
+                    return this._cardinalClient.getThreeDSecureData(error.body.three_ds_result, this._getOrderData(paymentData))
+                        .then(threeDSecure =>
+                            this._store.dispatch(this._paymentActionCreator.submitPayment({
+                                ...payment,
+                                paymentData: {
+                                    ...paymentData,
+                                    threeDSecure,
+                                },
+                            }))
+                        );
                 });
         });
     }
 
     private _placeOrder(order: OrderRequestBody, payment: OrderPaymentRequestBody, options?: PaymentRequestOptions): Promise<InternalCheckoutSelectors> {
         if (!payment.paymentData) {
-            throw new MissingDataError(MissingDataErrorType.MissingPayment);
+            return Promise.reject(new MissingDataError(MissingDataErrorType.MissingPayment));
         }
 
         return this._store.dispatch(this._orderActionCreator.submitOrder(order, options))
             .then(() =>
-                this._executePayment({ ...payment, paymentData: payment.paymentData })
+                this._store.dispatch(this._paymentActionCreator.submitPayment(payment))
             );
-    }
-
-    private _executePayment(payment: Payment): Promise<InternalCheckoutSelectors> {
-        return this._store.dispatch(
-            this._paymentActionCreator.submitPayment(payment)
-        );
     }
 
     private _getBinNumber(payment: CardinalSupportedPaymentInstrument): string {
