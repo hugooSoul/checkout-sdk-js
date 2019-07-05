@@ -86,26 +86,26 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
         const paymentData = payment.paymentData as CreditCardInstrument;
 
         return this._cardinalClient.configure(clientToken)
-        .then(() => this._cardinalClient.runBindProcess(this._getBinNumber(paymentData)))
-        .then(() => {
-            return this._placeOrder(order, payment, options)
-                .catch(error => {
-                    if (!(error instanceof RequestError) || !some(error.body.errors, { code: 'enrolled_card' })) {
-                        return Promise.reject(error);
-                    }
+            .then(() => this._cardinalClient.runBindProcess(this._getBinNumber(paymentData)))
+            .then(() => {
+                return this._placeOrder(order, payment, options)
+                    .catch(error => {
+                        if (!(error instanceof RequestError) || !some(error.body.errors, { code: 'enrolled_card' })) {
+                            return Promise.reject(error);
+                        }
 
-                    return this._cardinalClient.getThreeDSecureData(error.body.three_ds_result, this._getOrderData(paymentData))
-                        .then(threeDSecure =>
-                            this._store.dispatch(this._paymentActionCreator.submitPayment({
-                                ...payment,
-                                paymentData: {
-                                    ...paymentData,
-                                    threeDSecure,
-                                },
-                            }))
-                        );
-                });
-        });
+                        return this._cardinalClient.getThreeDSecureData(error.body.three_ds_result, this._getOrderData(paymentData))
+                            .then(threeDSecure =>
+                                this._store.dispatch(this._paymentActionCreator.submitPayment({
+                                    ...payment,
+                                    paymentData: {
+                                        ...paymentData,
+                                        threeDSecure,
+                                    },
+                                }))
+                            );
+                    });
+            });
     }
 
     private _placeOrder(order: OrderRequestBody, payment: OrderPaymentRequestBody, options?: PaymentRequestOptions): Promise<InternalCheckoutSelectors> {
