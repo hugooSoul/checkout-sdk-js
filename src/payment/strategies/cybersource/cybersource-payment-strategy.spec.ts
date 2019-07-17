@@ -220,7 +220,7 @@ describe('CyberSourcePaymentStrategy', () => {
                 }));
 
                 jest.spyOn(cardinalClient, 'configure').mockReturnValue(Promise.resolve());
-                jest.spyOn(cardinalClient, 'runBindProcess').mockReturnValue(Promise.resolve());
+                jest.spyOn(cardinalClient, 'runBinProcess').mockReturnValue(Promise.resolve());
 
                 await strategy.initialize({ methodId: paymentMethodMock.id });
             });

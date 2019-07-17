@@ -86,7 +86,7 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
         const paymentData = payment.paymentData as CreditCardInstrument;
 
         return this._cardinalClient.configure(clientToken)
-            .then(() => this._cardinalClient.runBindProcess(this._getBinNumber(paymentData)))
+            .then(() => this._cardinalClient.runBinProcess(this._getBinNumber(paymentData)))
             .then(() => {
                 return this._placeOrder(order, payment, options)
                     .catch(error => {
