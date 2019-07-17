@@ -14,7 +14,7 @@ import {
     CardinalAddress,
     CardinalConsumer,
     CardinalEventType,
-    CardinalInitializationType,    
+    CardinalInitializationType,
     CardinalPartialOrder,
     CardinalPaymentBrand,
     CardinalScriptLoader,
