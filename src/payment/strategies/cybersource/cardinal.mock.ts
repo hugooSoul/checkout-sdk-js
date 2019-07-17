@@ -3,16 +3,15 @@ import { getShippingAddress } from '../../../shipping/shipping-addresses.mock';
 import { ThreeDsResult } from '../../payment-response-body';
 import { getCreditCardInstrument } from '../../payments.mock';
 
-import { CardinalOrderData } from './cardinal-client';
-
 import {
     CardinalBinProcessResponse,
+    CardinalOrderData,
     CardinalPaymentType,
     CardinalSDK,
     CardinalValidatedAction,
     CardinalValidatedData,
     CardinalWindow,
-} from './cardinal';
+} from './index';
 
 const CardinalWindowMock: CardinalWindow = window;
 

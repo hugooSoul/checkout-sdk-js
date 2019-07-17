@@ -10,7 +10,7 @@ import { OrderActionCreator, OrderPaymentRequestBody, OrderRequestBody } from '.
 import { OrderFinalizationNotRequiredError } from '../../../order/errors';
 import isCreditCardLike from '../../is-credit-card-like';
 import isVaultedInstrument from '../../is-vaulted-instrument';
-import Payment, { CreditCardInstrument } from '../../payment';
+import { CreditCardInstrument } from '../../payment';
 import PaymentActionCreator from '../../payment-action-creator';
 import PaymentMethod from '../../payment-method';
 import PaymentMethodActionCreator from '../../payment-method-action-creator';
