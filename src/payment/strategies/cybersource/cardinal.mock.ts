@@ -5,13 +5,14 @@ import { getCreditCardInstrument } from '../../payments.mock';
 
 import {
     CardinalBinProcessResponse,
-    CardinalOrderData,
     CardinalPaymentType,
     CardinalSDK,
     CardinalValidatedAction,
     CardinalValidatedData,
     CardinalWindow,
 } from './cardinal';
+
+import { CardinalOrderData } from './cardinal-client';
 
 const CardinalWindowMock: CardinalWindow = window;
 
