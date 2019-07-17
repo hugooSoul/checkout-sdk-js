@@ -1,10 +1,4 @@
-import Address from '../../../address/address';
-import BillingAddress from '../../../billing/billing-address';
-import { CreditCardInstrument, VaultedInstrument } from '../../payment';
-
 export const CardinalSignatureValidationErrors = [100004, 1010, 1011, 1020];
-
-export type CardinalSupportedPaymentInstrument = CreditCardInstrument | VaultedInstrument;
 
 export interface CardinalSDK {
     configure(params: CardinalConfiguration): void;
@@ -44,15 +38,6 @@ export interface CardinalSetupCompletedData {
 export interface CardinalModuleState {
     loaded: boolean;
     module: string;
-}
-
-export interface CardinalOrderData {
-    billingAddress: BillingAddress;
-    shippingAddress?: Address;
-    currencyCode: string;
-    id: string;
-    amount: number;
-    paymentData?: CreditCardInstrument;
 }
 
 export enum CardinalInitializationType {
@@ -111,7 +96,7 @@ export interface CardinalConsumer {
     Email1?: string;
     Email2?: string;
     ShippingAddress?: CardinalAddress;
-    BillingAddress: CardinalAddress;
+    BillingAddress?: CardinalAddress;
     Account?: CardinalAccount;
 }
 

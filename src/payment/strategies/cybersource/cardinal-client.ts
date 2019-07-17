@@ -1,11 +1,12 @@
 import { includes } from 'lodash';
 
 import Address from '../../../address/address';
+import BillingAddress from '../../../billing/billing-address';
 import {
     MissingDataError, MissingDataErrorType, NotInitializedError,
     NotInitializedErrorType, StandardError
 } from '../../../common/error/errors';
-import { CreditCardInstrument, ThreeDSecureToken } from '../../payment';
+import { CreditCardInstrument, ThreeDSecureToken, VaultedInstrument } from '../../payment';
 import { ThreeDsResult } from '../../payment-response-body';
 
 import {
@@ -13,8 +14,7 @@ import {
     CardinalAddress,
     CardinalConsumer,
     CardinalEventType,
-    CardinalInitializationType,
-    CardinalOrderData,
+    CardinalInitializationType,    
     CardinalPartialOrder,
     CardinalPaymentBrand,
     CardinalScriptLoader,
@@ -24,6 +24,17 @@ import {
     CardinalValidatedAction,
     CardinalValidatedData
 } from './index';
+
+export type CardinalSupportedPaymentInstrument = CreditCardInstrument | VaultedInstrument;
+
+export interface CardinalOrderData {
+    billingAddress: BillingAddress;
+    shippingAddress?: Address;
+    currencyCode: string;
+    id: string;
+    amount: number;
+    paymentData?: CreditCardInstrument;
+}
 
 export default class CardinalClient {
     private _sdk?: Promise<CardinalSDK>;

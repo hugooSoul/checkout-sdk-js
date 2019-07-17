@@ -124,10 +124,11 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
     }
 
     private _getOrderData(paymentData: CardinalSupportedPaymentInstrument): CardinalOrderData {
-        const billingAddress = this._store.getState().billingAddress.getBillingAddress();
-        const shippingAddress = this._store.getState().shippingAddress.getShippingAddress();
-        const checkout = this._store.getState().checkout.getCheckout();
-        const order = this._store.getState().order.getOrder();
+        const state = this._store.getState();
+        const billingAddress = state.billingAddress.getBillingAddress();
+        const shippingAddress = state.shippingAddress.getShippingAddress();
+        const checkout = state.checkout.getCheckout();
+        const order = state.order.getOrder();
 
         if (!billingAddress || !billingAddress.email) {
             throw new MissingDataError(MissingDataErrorType.MissingBillingAddress);
