@@ -369,7 +369,7 @@ describe('CyberSourcePaymentStrategy', () => {
                 }
             });
 
-            it('use iin as BinNumber if is vaulted instrument', async () => {
+            it('use vaulted instrument as payment Datsa', async () => {
                 jest.spyOn(paymentActionCreator, 'submitPayment')
                     .mockReturnValueOnce(of(createErrorAction(PaymentActionType.SubmitPaymentFailed, requestError)));
                 jest.spyOn(cardinalClient, 'getThreeDSecureData').mockReturnValue(Promise.resolve('token'));
