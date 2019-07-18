@@ -121,7 +121,7 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
 
     private _getBinNumber(payment: CardinalSupportedPaymentInstrument): string {
         if (isVaultedInstrument(payment)) {
-            const instruments = this._store.getState().instruments.getInstruments()
+            const instruments = this._store.getState().instruments.getInstruments();
 
             const { instrumentId } = payment;
 
@@ -129,6 +129,7 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
 
             return entry && entry.iin || '';
         }
+
         return payment.ccNumber;
     }
 

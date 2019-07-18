@@ -80,7 +80,7 @@ export default class CardinalClient {
         }));
     }
 
-    runBinProcess(binNumber: string): Promise<void> {        
+    runBinProcess(binNumber: string): Promise<void> {
         return this._getClientSDK()
             .then(client => client.trigger(CardinalTriggerEvents.BinProcess, binNumber).catch(() => {}))
             .then(result => {
