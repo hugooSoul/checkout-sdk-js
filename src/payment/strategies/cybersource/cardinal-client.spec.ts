@@ -98,6 +98,28 @@ describe('CardinalClient', () => {
                 expect(error).toBeInstanceOf(MissingDataError);
             }
         });
+
+        it('avoids configuring multiple times', async () => {
+            let call: () => {};
+
+            sdk.on = jest.fn((type, callback) => {
+                if (type.toString() === CardinalEventType.SetupCompleted) {
+                    call = callback;
+                } else {
+                    jest.fn();
+                }
+            });
+
+            jest.spyOn(sdk, 'setup').mockImplementation(() => {
+                call();
+            });
+
+            await client.initialize(true);
+            await client.configure('token');
+            await client.configure('another_token');
+
+            expect(client.getClientToken()).toBe('token');
+        });
     });
 
     describe('#runBinProcess', () => {
@@ -222,6 +244,39 @@ describe('CardinalClient', () => {
                 expect(error).toBeInstanceOf(StandardError);
                 expect(error.message).toBe('User failed authentication or an error was encountered while processing the transaction');
             }
+        });
+    });
+
+    describe('#getClientToken', () => {
+        beforeEach(async () => {
+            await client.initialize(true);
+        });
+
+        it('returns an error when the client is not configured', () => {
+            try {
+                client.getClientToken();
+            } catch (error) {
+                expect(error).toBeInstanceOf(NotInitializedError);
+            }
+        });
+
+        it('returns the client token used to configure the cardinal client', async () => {
+            sdk.on = jest.fn((type, callback) => {
+                if (type.toString() === CardinalEventType.SetupCompleted) {
+                    setupCall = callback;
+                } else {
+                    validatedCall = callback;
+                }
+            });
+
+            jest.spyOn(sdk, 'setup').mockImplementation(() => {
+                setupCall();
+            });
+
+            const expectedToken = '123456';
+            await client.configure(expectedToken);
+
+            expect(client.getClientToken()).toBe(expectedToken);
         });
     });
 });

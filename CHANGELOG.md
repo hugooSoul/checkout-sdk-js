@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.27.2"></a>
+## [1.27.2](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.27.1...v1.27.2) (2019-07-16)
+
+
+### Bug Fixes
+
+* **common:** CHECKOUT-4254 Make sure changes to the public object don't affect the internal copies ([4447212](https://github.com/bigcommerce/checkout-sdk-js/commit/4447212))
+
+
+
+<a name="1.27.1"></a>
+## [1.27.1](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.27.0...v1.27.1) (2019-07-10)
+
+
+### Bug Fixes
+
+* **common:** CHECKOUT-4165 Add names to custom error objects ([c1505d1](https://github.com/bigcommerce/checkout-sdk-js/commit/c1505d1))
+
+
+
+<a name="1.27.0"></a>
+# [1.27.0](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.26.0...v1.27.0) (2019-07-08)
+
+
+### Features
+
+* **order:** CHECKOUT-2530 Add support for invisible recaptcha ([ee9aca5](https://github.com/bigcommerce/checkout-sdk-js/commit/ee9aca5))
+
+
+
 <a name="1.26.0"></a>
 # [1.26.0](https://github.com/bigcommerce/checkout-sdk-js/compare/v1.25.2...v1.26.0) (2019-07-04)
 

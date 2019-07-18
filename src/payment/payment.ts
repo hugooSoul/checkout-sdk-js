@@ -13,8 +13,8 @@ export interface PaymentInstrumentMeta {
 export interface CreditCardInstrument {
     ccCustomerCode?: string;
     ccExpiry: {
-        month: string,
-        year: string,
+        month: string;
+        year: string;
     };
     ccName: string;
     ccNumber: string;
@@ -42,8 +42,8 @@ export interface CryptogramInstrument {
     eci: string;
     transactionId?: string;
     ccExpiry: {
-        month: string,
-        year: string,
+        month: string;
+        year: string;
     };
     ccNumber: string;
     accountMask: string;

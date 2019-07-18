@@ -16,6 +16,7 @@ import { getConfigState } from '../../../config/configs.mock';
 import { getCustomerState } from '../../../customer/customers.mock';
 import { OrderActionCreator, OrderActionType, OrderRequestBody, OrderRequestSender } from '../../../order';
 import { OrderFinalizationNotRequiredError } from '../../../order/errors';
+import { createSpamProtection, SpamProtectionActionCreator } from '../../../order/spam-protection';
 import { PaymentActionType } from '../../payment-actions';
 import { getMasterpass, getPaymentMethodsState } from '../../payment-methods.mock';
 
@@ -23,7 +24,7 @@ import { MasterpassCheckoutOptions, MasterpassPaymentStrategy, MasterpassScriptL
 import { Masterpass } from './masterpass';
 import { getCallbackUrlMock, getMasterpassScriptMock } from './masterpass.mock';
 
-describe('MasterpassPaymentStragegy', () => {
+describe('MasterpassPaymentStrategy', () => {
     let strategy: MasterpassPaymentStrategy;
     let orderRequestSender: OrderRequestSender;
     let store: CheckoutStore;
@@ -59,7 +60,8 @@ describe('MasterpassPaymentStragegy', () => {
         jest.spyOn(store.getState().paymentMethods, 'getPaymentMethod').mockReturnValue(paymentMethodMock);
 
         const checkoutValidator = new CheckoutValidator(new CheckoutRequestSender(createRequestSender()));
-        orderActionCreator = new OrderActionCreator(orderRequestSender, checkoutValidator);
+        const spamProtectionActionCreator = new SpamProtectionActionCreator(createSpamProtection(createScriptLoader()));
+        orderActionCreator = new OrderActionCreator(orderRequestSender, checkoutValidator, spamProtectionActionCreator);
         const paymentRequestSender = new PaymentRequestSender(createPaymentClient());
         paymentActionCreator = new PaymentActionCreator(paymentRequestSender, orderActionCreator);
 
@@ -187,7 +189,7 @@ describe('MasterpassPaymentStragegy', () => {
             paymentActionCreator.submitPayment = jest.fn(() => submitPaymentAction);
         });
 
-        it('fails to submit order when payment is not provided', async () => {
+        it('fails to submit order when payment is not provided', () => {
             delete payload.payment;
             const error = 'Unable to submit payment because "payload.payment" argument is not provided.';
             expect(() => strategy.execute(payload)).toThrowError(error);
