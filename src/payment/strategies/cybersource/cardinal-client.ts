@@ -74,11 +74,11 @@ export default class CardinalClient {
     }
 
     getClientToken(): string {
-        if (!this._clientToken) { 
+        if (!this._clientToken) {
             throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
         }
-        
-        return this._clientToken; 
+
+        return this._clientToken;
     }
 
     runBindProcess(ccNumber: string): Promise<void> {
