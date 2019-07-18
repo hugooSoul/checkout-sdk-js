@@ -3330,6 +3330,8 @@ declare interface VaultedInstrument {
     instrumentId: string;
     ccCvv?: string;
     ccNumber?: string;
+    iin: string;
+    threeDSecure?: ThreeDSecure | ThreeDSecureToken;
 }
 
 /**
