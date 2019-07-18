@@ -37,7 +37,6 @@ export function getCreditCardInstrument(): CreditCardInstrument {
 
 export function getVaultedInstrument(): VaultedInstrument {
     return {
-        ccNumber: '',
         iin: '123123',
         instrumentId: '123123',
     };

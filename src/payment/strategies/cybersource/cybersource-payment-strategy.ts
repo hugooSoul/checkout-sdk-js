@@ -1,4 +1,4 @@
-import { some } from 'lodash';
+import { find, some } from 'lodash';
 
 import { CheckoutStore, InternalCheckoutSelectors } from '../../../checkout';
 import {
@@ -10,7 +10,7 @@ import { OrderActionCreator, OrderPaymentRequestBody, OrderRequestBody } from '.
 import { OrderFinalizationNotRequiredError } from '../../../order/errors';
 import isCreditCardLike from '../../is-credit-card-like';
 import isVaultedInstrument from '../../is-vaulted-instrument';
-import { CreditCardInstrument } from '../../payment';
+import { CreditCardInstrument, VaultedInstrument } from '../../payment';
 import PaymentActionCreator from '../../payment-action-creator';
 import PaymentMethod from '../../payment-method';
 import PaymentMethodActionCreator from '../../payment-method-action-creator';
@@ -32,7 +32,7 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
         private _orderActionCreator: OrderActionCreator,
         private _paymentActionCreator: PaymentActionCreator,
         private _cardinalClient: CardinalClient
-    ) {}
+    ) { }
 
     initialize(options: PaymentInitializeOptions): Promise<InternalCheckoutSelectors> {
         const { methodId } = options;
@@ -120,7 +120,16 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
     }
 
     private _getBinNumber(payment: CardinalSupportedPaymentInstrument): string {
-        return isVaultedInstrument(payment) ? payment.iin : payment.ccNumber;
+        if (isVaultedInstrument(payment)) {
+            const instruments = this._store.getState().instruments.getInstruments()
+
+            const { instrumentId } = payment;
+
+            const entry = find(instruments, { bigpayToken: instrumentId });
+
+            return entry && entry.iin || '';
+        }
+        return payment.ccNumber;
     }
 
     private _getOrderData(paymentData: CardinalSupportedPaymentInstrument): CardinalOrderData {
