@@ -34,6 +34,7 @@ import ConfigRequestSender from '../../../config/config-request-sender';
 import { getConfigState } from '../../../config/configs.mock';
 import { OrderActionCreator, OrderActionType, OrderRequestSender } from '../../../order';
 import { OrderFinalizationNotRequiredError } from '../../../order/errors';
+import { createSpamProtection, SpamProtectionActionCreator } from '../../../order/spam-protection';
 import { getPaymentMethodsState, getSquare } from '../../../payment/payment-methods.mock';
 import { PaymentActionType } from '../../payment-actions';
 import PaymentMethod from '../../payment-method';
@@ -99,14 +100,16 @@ describe('SquarePaymentStrategy', () => {
 
         const requestSender = createRequestSender();
         const paymentClient = createPaymentClient(store);
-        const registry = createPaymentStrategyRegistry(store, paymentClient, requestSender);
+        const spamProtection = createSpamProtection(createScriptLoader());
+        const registry = createPaymentStrategyRegistry(store, paymentClient, requestSender, spamProtection);
         const checkoutRequestSender = new CheckoutRequestSender(requestSender);
         const configRequestSender = new ConfigRequestSender(requestSender);
         const configActionCreator = new ConfigActionCreator(configRequestSender);
 
         orderActionCreator = new OrderActionCreator(
             orderRequestSender,
-            new CheckoutValidator(new CheckoutRequestSender(createRequestSender()))
+            new CheckoutValidator(new CheckoutRequestSender(createRequestSender())),
+            new SpamProtectionActionCreator(spamProtection)
         );
         paymentActionCreator = new PaymentActionCreator(
             new PaymentRequestSender(createPaymentClient()),
@@ -191,7 +194,7 @@ describe('SquarePaymentStrategy', () => {
                     await strategy.initialize(initOptions);
                 });
 
-                it('Creates Payload', async () => {
+                it('Creates Payload', () => {
                     jest.spyOn(store.getState().checkout, 'getCheckout')
                     .mockReturnValue(getSquarePaymentInitializeOptions());
 
@@ -202,7 +205,7 @@ describe('SquarePaymentStrategy', () => {
                     expect(scriptLoader.load).toHaveBeenCalledTimes(1);
                 });
 
-                it('Fails because no checkout information is present' , async () => {
+                it('Fails because no checkout information is present' , () => {
                     store = createCheckoutStore({});
 
                     if (callbacks.createPaymentRequest) {
@@ -344,7 +347,7 @@ describe('SquarePaymentStrategy', () => {
                 });
             });
 
-            describe('when cardNonceResponseReceived returns errors and callback is passed', async () => {
+            describe('when cardNonceResponseReceived returns errors and callback is passed', () => {
                 const catchSpy = jest.fn();
 
                 beforeEach(async () => {
@@ -367,7 +370,7 @@ describe('SquarePaymentStrategy', () => {
                 });
             });
 
-            describe('when cardNonceResponseReceived returns errors and no callback is passed', async () => {
+            describe('when cardNonceResponseReceived returns errors and no callback is passed', () => {
                 const catchSpy = jest.fn();
 
                 beforeEach(async () => {
@@ -392,7 +395,7 @@ describe('SquarePaymentStrategy', () => {
                 });
             });
 
-            describe('when the nonce is received', async () => {
+            describe('when the nonce is received', () => {
                 const payloadVaulted = getPayloadVaulted();
 
                 beforeEach(async () => {
