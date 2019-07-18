@@ -18,7 +18,6 @@ import {
     CardinalPartialOrder,
     CardinalPaymentBrand,
     CardinalScriptLoader,
-    CardinalSetupCompletedData,
     CardinalSignatureValidationErrors,
     CardinalSDK,
     CardinalTriggerEvents,
@@ -28,7 +27,6 @@ import {
 
 export default class CardinalClient {
     private _sdk?: Promise<CardinalSDK>;
-    private _sessionId?: string;
     private _clientToken?: string;
 
     constructor(
@@ -44,14 +42,14 @@ export default class CardinalClient {
     }
 
     configure(clientToken: string): Promise<void> {
-        if (this._sessionId) { return Promise.resolve(); }
+        if (this._clientToken) { return Promise.resolve(); }
 
         return this._getClientSDK()
             .then(client => new Promise<void>((resolve, reject) => {
-                client.on(CardinalEventType.SetupCompleted, (setupCompleteData: CardinalSetupCompletedData) => {
+                client.on(CardinalEventType.SetupCompleted, () => {
                     client.off(CardinalEventType.SetupCompleted);
                     client.off(CardinalEventType.Validated);
-                    this._sessionId = setupCompleteData.sessionId;
+                    this._clientToken = clientToken;
 
                     resolve();
                 });
@@ -69,17 +67,18 @@ export default class CardinalClient {
                     }
                 });
 
-                this._clientToken = clientToken;
-
                 client.setup(CardinalInitializationType.Init, {
-                    jwt: this._clientToken,
+                    jwt: clientToken,
                 });
         }));
     }
 
     getClientToken(): string {
-        if (this._clientToken) { return this._clientToken; }
-        throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
+        if (!this._clientToken) { 
+            throw new NotInitializedError(NotInitializedErrorType.PaymentNotInitialized);
+        }
+        
+        return this._clientToken; 
     }
 
     runBindProcess(ccNumber: string): Promise<void> {
