@@ -81,6 +81,14 @@ export default class CyberSourcePaymentStrategy implements PaymentStrategy {
         return this._cardinalClient.configure(clientToken)
             .then(() => this._cardinalClient.runBindProcess(paymentData.ccNumber))
             .then(() => {
+                payment = {
+                    ...payment,
+                    paymentData: {
+                        ...paymentData,
+                        threeDSecure: { token: this._cardinalClient.getClientToken() },
+                    },
+                };
+
                 return this._placeOrder(order, payment, options)
                     .catch(error => {
                         if (!(error instanceof RequestError) || !some(error.body.errors, { code: 'enrolled_card' })) {
