@@ -177,6 +177,64 @@ declare interface AdyenV2PaymentInitializeOptions {
     options?: Omit<AdyenCreditCardComponentOptions, 'onChange'>;
 }
 
+declare interface AmazonMaxoButtonInitializeOptions {
+    containerId: string;
+    options: AmazonMaxoButtonParams;
+}
+
+declare interface AmazonMaxoButtonParams {
+    merchantId: string;
+    createCheckoutSession: AmazonMaxoCheckoutSession;
+    placement: AmazonMaxoPlacement;
+    ledgerCurrency: AmazonMaxoLedgerCurrency;
+    productType?: string;
+    checkoutLanguage?: AmazonMaxoCheckoutLanguage;
+    sandbox?: boolean;
+}
+
+declare enum AmazonMaxoCheckoutLanguage {
+    es_ES = "es_ES",
+    en_GB = "en_GB",
+    en_US = "en_US",
+    de_DE = "de_DE",
+    fr_FR = "fr_FR",
+    it_IT = "it_IT",
+    ja_JP = "ja_JP"
+}
+
+declare interface AmazonMaxoCheckoutSession {
+    url: string;
+    method?: string;
+    extractAmazonCheckoutSessionId?: string;
+}
+
+declare interface AmazonMaxoCustomerInitializeOptions {
+    /**
+     * This container is used to set an event listener, provide an element ID if you want
+     * users to be able to launch the AmazonMaxo modal by clicking on a button.
+     */
+    container: string;
+}
+
+declare enum AmazonMaxoLedgerCurrency {
+    eu = "EUR",
+    jp = "JPY",
+    uk = "GBP",
+    us = "USD"
+}
+
+declare interface AmazonMaxoPaymentInitializeOptions {
+    walletButton?: string;
+}
+
+declare enum AmazonMaxoPlacement {
+    Home = "Home",
+    Product = "Product",
+    Cart = "Cart",
+    Checkout = "Checkout",
+    Other = "Other"
+}
+
 /**
  * A set of options that are required to initialize the customer step of
  * checkout to support Amazon Pay.
@@ -596,6 +654,11 @@ declare class CheckoutButtonErrorSelector {
 
 declare interface CheckoutButtonInitializeOptions extends CheckoutButtonOptions {
     /**
+     * The options that are required to facilitate AmazonMaxo. They can be
+     * omitted unless you need to support AmazonMaxo.
+     */
+    amazonmaxo?: AmazonMaxoButtonInitializeOptions;
+    /**
      * The options that are required to facilitate Braintree PayPal. They can be
      * omitted unless you need to support Braintree PayPal.
      */
@@ -716,6 +779,7 @@ declare interface CheckoutButtonInitializerOptions {
 }
 
 declare enum CheckoutButtonMethodType {
+    AMAZON_MAXO = "amazonmaxo",
     BRAINTREE_PAYPAL = "braintreepaypal",
     BRAINTREE_PAYPAL_CREDIT = "braintreepaypalcredit",
     GOOGLEPAY_BRAINTREE = "googlepaybraintree",
@@ -2516,6 +2580,11 @@ declare interface CustomerInitializeOptions extends CustomerRequestOptions {
     amazon?: AmazonPayCustomerInitializeOptions;
     /**
      * The options that are required to initialize the customer step of checkout
+     * when using Amazon Maxo.
+     */
+    amazonmaxo?: AmazonMaxoCustomerInitializeOptions;
+    /**
+     * The options that are required to initialize the customer step of checkout
      * when using Visa Checkout provided by Braintree.
      */
     braintreevisacheckout?: BraintreeVisaCheckoutCustomerInitializeOptions;
@@ -3315,6 +3384,11 @@ declare interface PaymentInitializeOptions extends PaymentRequestOptions {
      * method. They can be omitted unless you need to support AmazonPay.
      */
     amazon?: AmazonPayPaymentInitializeOptions;
+    /**
+     * The options that are required to initialize the AmazonMaxo payment
+     * method. They can be omitted unless you need to support AmazonMaxo.
+     */
+    amazonmaxo?: AmazonMaxoPaymentInitializeOptions;
     /**
      * The options that are required to initialize the BlueSnapV2 payment method.
      * They can be omitted unless you need to support BlueSnapV2.
